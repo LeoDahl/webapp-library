@@ -7,6 +7,10 @@ class Request
   private 
   def parse_request_line(req)
     lines = req.split("\n")
+    if lines[0] == nil then
+       print("bug") 
+       return nil 
+    end
     method, resource, version = lines[0].split()
     headers = handle_headers(lines.slice(1..lines.length))
     if method == "GET"
