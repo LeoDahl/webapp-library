@@ -1,5 +1,5 @@
 require 'socket'
-require "./lib/request.rb"
+require './lib/request.rb'
 
 class HTTPServer
 
@@ -20,10 +20,13 @@ class HTTPServer
       puts '-' * 40
       puts data
       puts '-' * 40
-      if data != "" then
-        request = Request.new(request_string: data)
+
+      request = Request.new(request_string: data)
+      p "postTCP = #{request.inspect()}"
+      if request.method == "POST"
+        params = session.gets(request.headers["content-length"])
+        request.parse_params(params)
       end
-      p request
 
       html = "<h1>Hello, World!</h1>"
 
