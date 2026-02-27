@@ -1,10 +1,13 @@
 require 'socket'
 require './lib/request.rb'
+require './lib/router.rb'
+
 
 class HTTPServer
 
-  def initialize(port)
+  def initialize(port, router)
     @port = port
+    @router = router
   end
 
   def start
@@ -22,11 +25,14 @@ class HTTPServer
       puts '-' * 40
 
       request = Request.new(request_string: data)
-      p "postTCP = #{request.inspect()}"
-      if request.method == "POST"
-        params = session.gets(request.headers["content-length"])
-        request.parse_params(params)
+      
+      if request.get_method == "POST"
+        content = session.gets(request.get_content_length)
+        request.get_post_params(content)
       end
+      
+      p "new router = #{@router}"
+      @router.handle_resource(request)
 
       html = "<h1>Hello, World!</h1>"
 
@@ -39,5 +45,16 @@ class HTTPServer
   end
 end
 
-server = HTTPServer.new(4567)
+router = Router.new()
+
+router.add_route("GET", "/hello") do
+  p "hello"
+end
+router.add_route("GET", "/ok/:id/test") do |id| ## /ok/4/test
+  what = id
+end
+
+p "org router #{router}"
+server = HTTPServer.new(4567, router)
 server.start
+

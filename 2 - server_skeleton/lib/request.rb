@@ -1,19 +1,33 @@
 class Request
   attr_reader :resource, :version, :headers, :params, :method
   def initialize(request_string:)
-    @method, @resource, @version, @headers = parse_request_line(request_string)
+    @method, @resource, @version, @headers, @params = parse_request_line(request_string)
+  end
+
+  def get_method
+    @method
+  end
+  def get_content_length
+    @headers["Content-Length"].to_i
+  end
+  def get_post_params(content)
+    @params = handle_params(content, "POST")
+    @params
+  end
+  def get_resource()
+    @resource
   end
 
   private 
   def parse_request_line(req)
-    p "req = #{req}"
-    attributes, *body = req.split("\n\n")
+    if req == nil then return end 
+    attributes, *body = req.split("\n")
 
     method, resource, version = attributes.split()
-    p body
     headers = handle_headers(body)
-    puts "headers: #{headers}"
-    if method == "GET" then handle_get_params(resource) end
+    if method == "GET" 
+      params = handle_params(resource, "GET") 
+    end
     return method, resource, version, headers, params
   end
   ## Header handler
@@ -40,34 +54,11 @@ class Request
       parameters = resource.split("&")
     end
     parameters.each do |param|
-      puts "param #{parameters}"
       split = param.split("=")
       paramshash[split[0]] = split[1].delete(" ")
     end
     paramshash
   end
 
-  ## GET handlers
-  def handle_get_params(resource)
-    paramshash = Hash.new
-    fulllist = resource.split("?")[1]
-    if !fulllist then return "" end
-    parameters = fulllist.split("&")
-    parameters.each do |param|
-      split = param.split("=")
-      paramshash[split[0]] = split[1].delete(" ")
-    end
-    paramshash
-  end
-  ## POST handlers
-  def parse_params(paramline)
-    paramshash = Hash.new
-    parameters = resource.split("&")
-    parameters.each do |param|
-      split = param.split("=")
-      paramshash[split[0]] = split[1].delete(" ")
-    end
-    paramshash
-  end
 end
 
