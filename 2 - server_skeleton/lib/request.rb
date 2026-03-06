@@ -4,24 +4,21 @@ class Request
     @method, @resource, @version, @headers, @params = parse_request_line(request_string)
   end
 
-  def get_method
-    @method
-  end
   def get_content_length
     @headers["Content-Length"].to_i
   end
+
   def get_post_params(content)
     @params = handle_params(content, "POST")
     @params
   end
-  def get_resource()
-    @resource
-  end
+
 
   private 
   def parse_request_line(req)
     if req == nil then return end 
     attributes, *body = req.split("\n")
+    if attributes == nil then return end
 
     method, resource, version = attributes.split()
     headers = handle_headers(body)
@@ -42,6 +39,9 @@ class Request
   end
 
   def handle_params(resource, type)
+    if resource == nil 
+      return
+    end
     paramshash = Hash.new
     parameters = nil
     if type == "GET"

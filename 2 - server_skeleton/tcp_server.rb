@@ -1,17 +1,20 @@
 require 'socket'
 require './lib/request.rb'
 require './lib/router.rb'
+require './lib/response.rb'
 
 
 class HTTPServer
 
-  def initialize(port, router)
+  def initialize(port, router, responseHandler)
     @port = port
     @router = router
+    @responseHandler = responseHandler
   end
 
   def start
     server = TCPServer.new(@port)
+    
     puts "Listening on #{@port}"
 
     while session = server.accept
@@ -26,35 +29,49 @@ class HTTPServer
 
       request = Request.new(request_string: data)
       
-      if request.get_method == "POST"
+      if request.method == "POST"
         content = session.gets(request.get_content_length)
         request.get_post_params(content)
       end
       
       p "new router = #{@router}"
+
       @router.handle_resource(request)
 
-      html = "<h1>Hello, World!</h1>"
+      resource = request.resource
+      content, content_type = @responseHandler.build(resource, session)
+      p content, content_type
 
       session.print "HTTP/1.1 200\r\n"
-      session.print "Content-Type: text/html\r\n"
+      session.print "Content-Type: #{content_type}\r\n"
+
+      session.print ""
       session.print "\r\n"
-      session.print html
+      session.print content
       session.close
+      
     end
   end
 end
 
 router = Router.new()
+responseHandler = Response.new()
 
 router.add_route("GET", "/hello") do
-  p "hello"
+  load_file = "/html/hello.html"
+  responseHandler.load(load_file, "/hello")
 end
 router.add_route("GET", "/ok/:id/test") do |id| ## /ok/4/test
-  what = id
+  load_file = "/html/hello.html"
+  responseHandler.load(load_file, "/ok/:id/test")
+  puts "id = #{id}"
+end
+router.add_route("GET", "/ok/:id/at/:test") do |id, testthing| ## /ok/4/test
+  puts "id = #{id}"
+  puts "test = #{testthing}"
 end
 
 p "org router #{router}"
-server = HTTPServer.new(4567, router)
+server = HTTPServer.new(4567, router, responseHandler)
 server.start
 

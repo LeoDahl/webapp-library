@@ -4,7 +4,6 @@ def convert_resource_to_regex(resource)
   regex = "^"
   if !resource.include?(":")
     p "no index"
-    return nil
   end
 
   split = resource.split("/")
@@ -15,12 +14,20 @@ def convert_resource_to_regex(resource)
     if section[0] == ":"
       section = "(?<#{section}>\\w+)"
     end 
-    regex += section + "/"
+    
+    if !section != ""  
+      regex += section + "/" 
+    end
     
   end
   regex += "$"
+  p regex
   final = Regexp.new(regex)
   return final
 end
 
-p convert_resource_to_regex("/hello/:id/ok")
+regexToMatch =  convert_resource_to_regex("/hello/:id/ok/")
+resource = "/hello/Value/ok/"
+
+p regexToMatch
+p regexToMatch.match(resource)
