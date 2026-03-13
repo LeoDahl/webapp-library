@@ -16,6 +16,7 @@ class Router
     new_route["regex"] =  regex
     new_route["blocks"] = block
     @initialized_routes << new_route
+    p @initialized_routes
 
     new_route
   end
@@ -27,8 +28,8 @@ class Router
     @initialized_routes.each do |route|
       if route["regex"] && route["regex"].match(resource) 
         match = route["regex"].match(resource).captures
-    
-
+        #binding.break
+        p route["regex"]
         route["blocks"].call(match)
       end
     end
@@ -39,7 +40,10 @@ class Router
 
   def convert_resource_to_regex(resource)
     regex = "^"
-  
+    if resource == "/"
+      return Regexp.new("^\/$")
+    end
+
     split = resource.split("/")
     split.each_with_index do |section, index| 
       # /ok/:id/test
@@ -53,7 +57,7 @@ class Router
       end
       
     end
-    regex += "?$"
+    regex += "$"
     final = Regexp.new(regex)
     return final
   end
