@@ -23,6 +23,9 @@ class HTTPServer
       while line = session.gets and line !~ /^\s*$/
         data += line
       end
+      if data == nil
+        return
+      end
       puts "RECEIVED REQUEST"
       puts '-' * 40
       puts data
@@ -31,20 +34,24 @@ class HTTPServer
       request = Request.new(request_string: data)
       
       if request.method == "POST"
+        p "post recieved"
         content = session.gets(request.get_content_length)
-        request.get_post_params(content)
-        @router.handle_resource(request)
+        postparams = request.get_post_params(content)
+        p "postparams  = #{postparams}"
+        @router.handle_post_resource(request, postparams)
       else
       
       p "new router = #{@router}"
      # binding.break
-      @router.handle_resource(request)
+      call = @router.handle_resource(request)
 
       resource = request.resource
 
-      accept = request.headers["Accept"]
+      if request.headers != nil and request != nil
+        accept = request.headers["Accept"]
+        content, content_type = @responseHandler.build(call)
+      end
 
-      content, content_type = @responseHandler.build(resource, session, accept)
 
       session.print "HTTP/1.1 200\r\n"
       session.print "Content-Type: #{content_type}\r\n"
@@ -64,27 +71,31 @@ responseHandler = Response.new()
 
 
 router.add_route("GET", "/") do
+  p "/ says hello"
   load_file = "/html/hello.html"
-  responseHandler.load(load_file, "/")
+  load_file
 end
 router.add_route("GET", "/hello") do
   load_file = "/html/hello.html"
-  responseHandler.load(load_file, "/hello")
 end
 router.add_route("GET", "/ok/:id/test") do |id| ## /ok/4/test
   #p id
   #return File.read("public/html/hello.html")
   p "hi"
-  return "id was: #{id}"
+  p "id was: #{id}"
   #responseHandler.load(load_file, "/ok/skibidi/test")
 
 end
-router.add_route("GET", "/ok/:id/at/:test") do |id, testthing| ## /ok/4/test
+router.add_route("GET", "/hi/:id/:test") do |id, testthing| ## /ok/4/test
   puts "id = #{id}"
   puts "test = #{testthing}"
 end
 router.add_route("POST", "/") do |id|
   puts "hej"
+end
+router.add_route("POST", "/login") do |id|
+  p "recieved post for /login"
+  p id
 end
 
 p "org router #{router}"

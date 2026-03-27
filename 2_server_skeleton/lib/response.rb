@@ -5,7 +5,7 @@ class Response
     @file_to_resource = Hash.new()
   end
 
-  def load(file, resource)
+  def load(file)
     path = @public + file
     @file_to_resource[resource] = path
     p "file_to_resource = #{@file_to_resource}"
@@ -13,7 +13,8 @@ class Response
 
 
 
-  def build(resource, session, acceptable)
+  def build(resource)
+    p "build ran"
     p "resource = #{resource}"
 
     file = @public + resource

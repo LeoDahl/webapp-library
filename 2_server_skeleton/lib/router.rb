@@ -1,8 +1,11 @@
+require_relative "response.rb"
+
 class Router
   
   attr_reader :initialized_routes
 
   def initialize()
+    @responseHandler = Response.new()
     @initialized_routes = []
   end
 
@@ -16,50 +19,64 @@ class Router
     new_route["regex"] =  regex
     new_route["blocks"] = block
     @initialized_routes << new_route
-    p @initialized_routes
+    p new_route
 
     new_route
+  end
+
+  def handle_post_resource(resource, params)
+ 
   end
 
   def handle_resource(resource)
     method = resource.method
     resource = resource.resource
 
+    p "HR resource = #{resource}"
+
     @initialized_routes.each do |route|
+      p "#{route["regex"]} tried to match with #{resource}"
       if route["regex"] && route["regex"].match(resource) 
         match = route["regex"].match(resource).captures
+        p "match with #{match}"
         #binding.break
         p route["regex"]
-        route["blocks"].call(match)
+        p "call is handled"
+        call = route["blocks"].call(match)
+        @responseHandler.build(call)
+        return call  
       end
     end
+    p "potentially a file?"
+    return resource
   end
 
   private 
   
+  
 
   def convert_resource_to_regex(resource)
-    regex = "^"
-    if resource == "/"
-      return Regexp.new("^\/$")
-    end
+    parts = resource.split("/")
+    parts = parts.reject! {|p| p.empty?}
 
-    split = resource.split("/")
-    split.each_with_index do |section, index| 
-      # /ok/:id/test
-      # ^\/ok (?<:id>\w+) test
-      if section[0] == ":"
-        section = "(?<#{section}>\\w+)"
-      end 
-      
-      if !section != ""  
-        regex += section + "/" 
-      end
-      
+    if resource == "/"
+      p "empty route"
+      return Regexp.new("^/$")
     end
-    regex += "$"
-    final = Regexp.new(regex)
-    return final
-  end
+    parts.map! do |part|
+      p part
+      #resource.gsub(/:(\w+)/, "?(<#{$1}>)\w+")
+
+      if part[0] == ":"
+        name = part[1..]
+        "(?<#{name}>" + '\w+)'
+      else
+        part
+      end
+    end
+    p parts.join("/")
+    Regexp.new("^\/#{parts.join("/")}$")
+    #Regexp.new(parts.join("/"))
+    end
 end
 
