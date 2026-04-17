@@ -8,19 +8,19 @@ class Response
   def load(file)
     path = @public + file
     @file_to_resource[resource] = path
-    p "file_to_resource = #{@file_to_resource}"
+    #p "file_to_resource = #{@file_to_resource}"
   end
 
 
 
   def build(resource)
-    p "build ran"
-    p "resource = #{resource}"
+   # p "build ran"
+    #p "resource = #{resource}"
 
     file = @public + resource
 
     if @file_to_resource[resource]  
-      p "resource found binded to block"
+      #p "resource found binded to block"
       build_from_block(resource)
     elsif File.exist?(file) and File.directory?(file) == false
       filetype = detect_filetype(resource)
@@ -41,7 +41,7 @@ class Response
     return newpath[-1]
   end
   def get_content_type(type)
-    p "GET CONTENT TYPE IS RAN"
+   # p "GET CONTENT TYPE IS RAN"
     valid_image_files = ["jpeg","png","jpg"]
 
     if type == "jpg"
@@ -52,7 +52,7 @@ class Response
     path = @file_to_resource[resource]
 
     if path 
-      p "path is real"
+      #p "path is real"
 
       if File.exist?(path)
         content = File.binread(path)

@@ -11,11 +11,11 @@ def test2(resource)
   parts = parts.reject! {|p| p.empty?}
 
   if resource == "/"
-    p "empty route"
+   # p "empty route"
     return Regexp.new("/")
   end
   parts.map! do |part|
-    p part
+   # p part
     #resource.gsub(/:(\w+)/, "?(<#{$1}>)\w+")
 
     if part[0] == ":"

@@ -26,22 +26,23 @@ class HTTPServer
       if data == nil
         return
       end
-      puts "RECEIVED REQUEST"
-      puts '-' * 40
-      puts data
-      puts '-' * 40
+      #puts "RECEIVED REQUEST"
+      #puts '-' * 40
+      #puts data
+      #puts '-' * 40
 
       request = Request.new(request_string: data)
       
       if request.method == "POST"
-        p "post recieved"
+        #p "post recieved"
         content = session.gets(request.get_content_length)
         postparams = request.get_post_params(content)
-        p "postparams  = #{postparams}"
+        #p "postparams  = #{postparams}"
+        #p "request = #{request}"
         @router.handle_post_resource(request, postparams)
       else
       
-      p "new router = #{@router}"
+      #p "new router = #{@router}"
      # binding.break
       call = @router.handle_resource(request)
 
@@ -54,8 +55,7 @@ class HTTPServer
 
 
       session.print "HTTP/1.1 200\r\n"
-      session.print "Content-Type: #{content_type}\r\n"
-
+      if content_type then session.print "Content-Type: #{content_type}\r\n" end
       session.print ""
       session.print "\r\n"
       session.print content
@@ -76,7 +76,7 @@ router.add_route("GET", "/") do
   load_file
 end
 router.add_route("GET", "/hello") do
-  load_file = "/html/hello.html"
+  p "hello 2"
 end
 router.add_route("GET", "/ok/:id/test") do |id| ## /ok/4/test
   #p id
@@ -86,16 +86,21 @@ router.add_route("GET", "/ok/:id/test") do |id| ## /ok/4/test
   #responseHandler.load(load_file, "/ok/skibidi/test")
 
 end
-router.add_route("GET", "/hi/:id/:test") do |id, testthing| ## /ok/4/test
+router.add_route("GET", "/hi/:id/:test") do |id, test| ## /ok/4/test
   puts "id = #{id}"
-  puts "test = #{testthing}"
+  puts "test = #{test}"
+  load_file = "/html/hello.html"
+  load_file
 end
 router.add_route("POST", "/") do |id|
   puts "hej"
 end
-router.add_route("POST", "/login") do |id|
+router.add_route("POST", "/login") do |params|
   p "recieved post for /login"
-  p id
+  user = params["username"]
+  pass = params["password"]
+  p user,pass
+  return "välkommen"
 end
 
 p "org router #{router}"
