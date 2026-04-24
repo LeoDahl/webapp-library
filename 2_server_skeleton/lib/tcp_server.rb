@@ -7,10 +7,10 @@ require './lib/response.rb'
 
 class HTTPServer
 
-  def initialize(port, router, responseHandler)
+  def initialize(port, router)
     @port = port
     @router = router
-    @responseHandler = responseHandler
+    @responseHandler = Response.new
   end
 
   def start
@@ -66,44 +66,5 @@ class HTTPServer
   end
 end
 
-router = Router.new()
-responseHandler = Response.new()
 
-
-router.add_route("GET", "/") do
-  p "/ says hello"
-  load_file = "/html/hello.html"
-  load_file
-end
-router.add_route("GET", "/hello") do
-  p "hello 2"
-end
-router.add_route("GET", "/ok/:id/test") do |id| ## /ok/4/test
-  #p id
-  #return File.read("public/html/hello.html")
-  p "hi"
-  p "id was: #{id}"
-  #responseHandler.load(load_file, "/ok/skibidi/test")
-
-end
-router.add_route("GET", "/hi/:id/:test") do |id, test| ## /ok/4/test
-  puts "id = #{id}"
-  puts "test = #{test}"
-  load_file = "/html/hello.html"
-  load_file
-end
-router.add_route("POST", "/") do |id|
-  puts "hej"
-end
-router.add_route("POST", "/login") do |params|
-  p "recieved post for /login"
-  user = params["username"]
-  pass = params["password"]
-  p user,pass
-  return "välkommen"
-end
-
-p "org router #{router}"
-server = HTTPServer.new(4567, router, responseHandler)
-server.start
 

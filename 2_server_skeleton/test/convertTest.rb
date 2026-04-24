@@ -1,18 +1,10 @@
-require_relative 'spec_helper'
-
 def convert_resource_to_regex(resource)
-  p "resource = #{resource}"
-
-  
-end
-
-def test2(resource)
   parts = resource.split("/")
   parts = parts.reject! {|p| p.empty?}
 
   if resource == "/"
    # p "empty route"
-    return Regexp.new("/")
+    return Regexp.new("^/$")
   end
   parts.map! do |part|
    # p part
@@ -25,11 +17,26 @@ def test2(resource)
       part
     end
   end
-  p parts.join("/")
-  p Regexp.new("^\/#{parts.join("/")}$")
+  #p parts.join("/")
+  Regexp.new("^\/#{parts.join("/")}$")
   #Regexp.new(parts.join("/"))
 end
 
 
-reg = test2("/ok/:capture/test")
-p reg.match("/ok/skibidi/test")
+def gsubtest(resource)
+  resource = "^#{resource}$"
+  resource.split("/").each do |l|
+    if l[0] == ":"
+      name = l[1..]
+      resource.gsub!(l, "(?<#{name}>" + '\w+)')
+    end
+  end
+  Regexp.new(resource)
+end
+
+string = "/skibidi/:one/:two"
+
+a = convert_resource_to_regex(string)
+p a 
+p a.match("/skibidi/hello/bye")
+#gsubtest("hello/test/:skibidi/test")
